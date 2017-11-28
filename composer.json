@@ -1,0 +1,20 @@
+{
+    "name": "lethia/facebook",
+    "description": "\"Solr API\"",
+    "authors": [
+        {
+            "name": "Joussyd Calupig",
+            "email": "joussydmcalupig@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^7.0",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lethia\\Solr\\": "src/"
+        }
+    }
+}
