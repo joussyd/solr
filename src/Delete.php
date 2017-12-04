@@ -7,20 +7,17 @@
  * distributed with this package.
  *
  * @category Class
- * @package  Search
+ * @package  Delete
  * @author   Joussyd Calupig <joussydmcalupig@gmail.com>
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  */
 namespace Lethia\Solr;
 
-class Search extends Base
+class Delete extends Base
 {
     /* Constants
     ---------------------------------------------*/
-    const CACHE_CONTROL = 'Cache-Control: no-cache';
-    const CONTENT_TYPE  = 'content-type: application/json';
-    const UPDATE_URL    = '/solr/%s/select';
-    const USER_AGENT    = '';
+    const DELETE_URL = '/solr/%s/update?commit=true';
 
     /* Protected Properties
     ---------------------------------------------*/
@@ -55,94 +52,50 @@ class Search extends Base
     */
     private function _execute()
     {
-        //get query strings
-        $queryString = $this->_buildQuery();
-        //get filters
-        $filterQuery = $queryString['fqs'];
-        //unset filters in the query srings
-        unset($queryString['fqs']);
+        //execute the curl request
+        //convert array data into json
+        $data = json_encode(array('delete'=>$this->data));
 
-        $filters = '';
-        foreach ($filterQuery as $value) {
-            $filters .= 'fq' . '=' . $value;
-        }
-
-        //convert data into json
-        $data = json_encode($this->data);
         //build url
-        $url = $this->host . ':' . $this->port   . sprintf(self::UPDATE_URL, $this->core);
-        //append query strings in the url
-        $url = $url . '?' . http_build_query($queryString);
+        $url = $this->host . ':' . $this->port . sprintf(self::DELETE_URL, $this->core);
+
         //initialize curl request
         $ch = curl_init();
+
         //set request url
         curl_setopt($ch, CURLOPT_URL, $url);
+
         //set to return the result on success and 'false' on failure
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        //set GET HTTP Request
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+
+        //set request's post data
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+        //set the request type to HTTP POST
+        curl_setopt($ch, CURLOPT_POST, 1);
+
         //build headers
         $headers = array();
-        //set cache
         $headers[] = "Cache-Control: no-cache";
-        //set content type
         $headers[] = "Content-Type: application/json";
         //set http headers
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
         // decode curl response to json
         $response = json_decode(curl_exec($ch), true);
+
         // get the request's return code
         $http_code = curl_getinfo($ch,CURLINFO_HTTP_CODE);
+
         // check if the return code is OK
         if($http_code != 200) {
             throw new \Exception('Error: Failed to recieve response from ' . $url);
         }
+
         // close the connection
         curl_close($ch);
+
         // return response
         return $response;
-    }
-
-
-    /**
-    * Build Query
-    *
-    * @return array $queryString Query String
-    */
-    private function _buildQuery()
-    {
-        $queryString = array();
-
-        //set query
-        $q = $this->query;
-        //set definition type
-        $defType = $this->defType;
-        //set field list
-        $fl = implode(' ', $this->fieldList);
-        //set filters
-        $fqs = $this->filterQuery;
-        $qf = '';
-        //set sort
-        $sort = implode(' ', $this->sort[0]);
-        //set pagination
-        $start = $this->start;
-        //set results per page
-        $rows = $this->rows;
-        //set Query Fields
-        foreach ($this->queryField as $key => $value) {
-            $qf .= $key . '^' . $value . ' ';
-        }
-
-        //set query strings
-        $queryString['q']       = $q;
-        $queryString['defType'] = $defType;
-        $queryString['fl']      = $fl;
-        $queryString['qf']      = $qf;
-        $queryString['fqs']     = $fqs;
-        $queryString['sort']    = $sort;
-        $queryString['start']   = $start;
-        $queryString['rows']    = $rows;
-
-        return $queryString;
     }
 }
