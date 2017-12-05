@@ -21,6 +21,7 @@ class Factory
     ---------------------------------------------*/
     /* Protected Properties
     ---------------------------------------------*/
+    //solr conection
     protected $host = 'http://localhost';
     protected $user = '';
     protected $pass = '';

@@ -20,6 +20,9 @@ class Base
     ---------------------------------------------*/
     /* Protected Properties
     ---------------------------------------------*/
+    //commit
+    protected $commit = 'true';
+    //solr connection
     protected $core = null;
     protected $data = array();
     protected $host = null;
@@ -32,10 +35,18 @@ class Base
     protected $fieldList   = null;
     protected $filterQuery = array();
     protected $query       = null;
-    protected $queryField  = null;
+    protected $queryField  = array();
     protected $sort        = null;
     protected $start       = null;
     protected $rows        = null;
+
+    //request headers
+    protected $cacheControl = 'Cache-Control: no-cache';
+    protected $contentType  = 'Content-Type: application/json';
+    protected $userAgent    = '';
+
+    //datatype
+    protected $dataType = 'json';
 
     /* Private Properties
     ---------------------------------------------*/
@@ -82,7 +93,7 @@ class Base
         if ($name == 'returnField') {
             $this->fieldList[] = $args[0];
         }
-        
+
         return $this;
     }
 
@@ -140,7 +151,7 @@ class Base
      /**
     * Set Rows
     *
-    * @param  integer $rows Number of result per page
+    * @param  integer $rows Number of results per page
     * @return $this
     */
     public function setRows($rows)

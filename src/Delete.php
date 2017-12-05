@@ -17,7 +17,7 @@ class Delete extends Base
 {
     /* Constants
     ---------------------------------------------*/
-    const DELETE_URL = '/solr/%s/update?commit=true';
+    const DELETE_URL    = '/solr/%s/update';
 
     /* Protected Properties
     ---------------------------------------------*/
@@ -52,12 +52,16 @@ class Delete extends Base
     */
     private function _execute()
     {
-        //execute the curl request
         //convert array data into json
         $data = json_encode(array('delete'=>$this->data));
 
         //build url
-        $url = $this->host . ':' . $this->port . sprintf(self::DELETE_URL, $this->core);
+        $url = $this->host 
+              . ':' 
+              . $this->port 
+              . sprintf(self::DELETE_URL, $this->core)
+              .'?commit='
+              . $this->commit;
 
         //initialize curl request
         $ch = curl_init();
@@ -76,8 +80,13 @@ class Delete extends Base
 
         //build headers
         $headers = array();
-        $headers[] = "Cache-Control: no-cache";
-        $headers[] = "Content-Type: application/json";
+
+        //set cache control
+        $headers[] = $this->cacheControl;
+
+        //set content type
+        $headers[] = $this->contentType;
+
         //set http headers
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 

@@ -17,15 +17,10 @@ class Update extends Base
 {
     /* Constants
     ---------------------------------------------*/
-    const CACHE_CONTROL = 'Cache-Control: no-cache';
-    const CONTENT_TYPE  = 'content-type: application/json';
-    const UPDATE_URL    = '/solr/%s/update/%s/docs?commit=true';
-    const USER_AGENT    = '';
+    const UPDATE_URL    = '/solr/%s/update/%s/docs';
 
     /* Protected Properties
     ---------------------------------------------*/
-    protected $dataType = 'json';
-
     /* Private Properties
     ---------------------------------------------*/
     /* Constructor
@@ -57,46 +52,37 @@ class Update extends Base
     {
         //convert data into json
         $data = json_encode($this->data);
-
         //build url
-        $url = $this->host . ':' . $this->port . sprintf(self::UPDATE_URL, $this->core, $this->dataType);
-
+        $url = $this->host . ':' 
+                . $this->port 
+                . sprintf(self::UPDATE_URL, $this->core, $this->dataType) 
+                . '?commit=' . $this->commit;
         //initialize curl request
         $ch = curl_init();
-
         //set request url
         curl_setopt($ch, CURLOPT_URL, $url);
-
         //set to return the result on success and 'false' on failure
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
         //set request's post data
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-
         //set the request type to HTTP POST
         curl_setopt($ch, CURLOPT_POST, 1);
-
         //build headers
         $headers = array();
-        $headers[] = "Cache-Control: no-cache";
-        $headers[] = "Content-Type: application/json";
+        $headers[] = $this->cacheControl;
+        $headers[] = $this->contentType;
         //set http headers
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
         // decode curl response to json
         $response = json_decode(curl_exec($ch), true);
-
         // get the request's return code
         $http_code = curl_getinfo($ch,CURLINFO_HTTP_CODE);
-
         // check if the return code is OK
         if($http_code != 200) {
             throw new \Exception('Error: Failed to recieve response from ' . $url);
         }
-
         // close the connection
         curl_close($ch);
-
         // return response
         return $response;
     }

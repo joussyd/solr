@@ -17,15 +17,10 @@ class Search extends Base
 {
     /* Constants
     ---------------------------------------------*/
-    const CACHE_CONTROL = 'Cache-Control: no-cache';
-    const CONTENT_TYPE  = 'content-type: application/json';
     const UPDATE_URL    = '/solr/%s/select';
-    const USER_AGENT    = '';
 
     /* Protected Properties
     ---------------------------------------------*/
-    protected $dataType = 'json';
-
     /* Private Properties
     ---------------------------------------------*/
     /* Constructor
@@ -83,10 +78,10 @@ class Search extends Base
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         //build headers
         $headers = array();
-        //set cache
-        $headers[] = "Cache-Control: no-cache";
-        //set content type
-        $headers[] = "Content-Type: application/json";
+        //set header cache control
+        $headers[] = $this->cacheControl;
+        //set header content type
+        $headers[] = $this->contentType;
         //set http headers
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         // decode curl response to json
@@ -112,7 +107,6 @@ class Search extends Base
     private function _buildQuery()
     {
         $queryString = array();
-
         //set query
         $q = $this->query;
         //set definition type
@@ -121,6 +115,7 @@ class Search extends Base
         $fl = implode(' ', $this->fieldList);
         //set filters
         $fqs = $this->filterQuery;
+        //define  queryfield
         $qf = '';
         //set sort
         $sort = implode(' ', $this->sort[0]);
@@ -142,7 +137,7 @@ class Search extends Base
         $queryString['sort']    = $sort;
         $queryString['start']   = $start;
         $queryString['rows']    = $rows;
-
+        //return Query String
         return $queryString;
     }
 }
